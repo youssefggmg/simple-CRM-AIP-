@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model CompanyProfile {
+  companyID     Int      @id @default(autoincrement())
+  businessName  String   @unique
+  corporateSeat Int
+  creationDate  DateTime @default(now())
+  taxID         String
+  capital       Int
+  numberOfEmployees Int
+  phoneNumber   String   @unique
+  email         String   @unique
+  products      Product[] // One-to-Many relationship with Product
+}
+
+model Product {
+  productID Int     @id @default(autoincrement())
+  buyPrice  Int
+  sellPrice Int
+  size      Int
+  color     String?
+  company   CompanyProfile @relation(fields: [companyID], references: [companyID])
+  companyID Int
+  sales     Sale[]         // One-to-Many relationship with Sale
+}
+
+model Customer {
+  ID   Int      @id @default(autoincrement())
+  customerName String  // Varchar(25) not null
+  customerAddress String // Varchar(50) not null (corrected spelling)
+  city         String   // Varchar(25) not null
+  phoneNumber  String @unique  // Varchar(25) not null
+  customerEmail String @unique // Varchar(255) not null (corrected spelling)
+  sales Sale[]
+}
+
+// Many-to-Many relationship between CompanyProfile and Product through Sale
+model Sale {
+  // saleID Int @id @default(autoincrement())
+  productID Int @default(autoincrement())
+  customerID Int
+  quantity Int
+  customer Customer @relation(fields: [customerID], references: [ID])
+  product Product @relation(fields: [productID], references: [productID])
+
+  @@id([productID,customerID])
+}
